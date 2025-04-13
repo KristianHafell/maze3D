@@ -1,7 +1,7 @@
 export class Player {
     constructor(pos, rot=0) {
         this.pos = pos
-        this.speed = 1
+        this.speed = 0.02
         this.rot = rot
         this.rot_speed = Math.PI / 70
     }
