@@ -12,9 +12,10 @@ const no_key_text = ["You need to find the key!", "It is somewhere in the maze"]
 const ending_text = ["Congratulations!", "You managed to escape the maze!", ""];
 
 export class View {
-    constructor(model, images) {
+    constructor(model, images, sounds) {
         this.model = model;
         this.images = images;
+        this.sounds = sounds;
         this.view_map = []
 
         this.key = new ViewObject("surface", [size-25-3*5, 25], [3*5, 7*5], 0, null, null, this.images["key"]);
@@ -22,6 +23,21 @@ export class View {
 
     draw() {
         let view_objects = []
+
+        if (this.model.play_key) {
+            this.play_key();
+            this.model.play_key = false;
+        }
+        if (this.model.play_victory) {
+            this.play_victory();
+            this.model.play_victory = false; 
+        }
+        if (this.model.play_ambient[0]) {
+            this.sounds.ambient.currentTime = 0;
+            this.sounds.ambient.play();
+            this.model.play_ambient[0] = false;
+        }
+
         ctx.clearRect(0, 0, size, size);
         
         // console.log(this.model.hasKey, this.model.isGoal, this.model.isVal(4));
@@ -157,5 +173,14 @@ export class View {
             const centerY = (size - 50 * textList.length) / 2;
             ctx.fillText(text, centerX, centerY + i * 50);
         });
+    }
+
+    play_key() {
+        this.sounds.key.currentTime = 0;
+        this.sounds.key.play();
+    }
+    play_victory() {
+        this.sounds.victory.currentTime = 0;
+        this.sounds.victory.play();
     }
 }
