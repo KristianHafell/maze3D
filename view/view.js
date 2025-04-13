@@ -7,7 +7,7 @@ ctx.imageSmoothingEnabled = false;
 
 const eu = Math.exp(Math.log(700) / 10);
 
-const welcome_text = ["Welcome to the maze!", "Use WASD to move", "Use QE to rotate", "h = hint"]
+const welcome_text = ["Welcome to the maze!", "Use WASD to move", "h = hint"]
 const no_key_text = ["You need to find the key!", "It is somewhere in the maze"]
 const ending_text = ["Congratulations!", "You managed to escape the maze!"]
 
@@ -35,13 +35,13 @@ export class View {
         this.add_obstacles(view_objects);
 
         
-        for (let i = 0; i < this.model.maze.layout.length; i++) {
-            for (let j = 0; j < this.model.maze.layout[i].length; j++) {
-                if (this.model.maze.layout[i][j] === 1) {
-                    view_objects.push(new ViewObject("rect", [j * 10, i * 10], [10, 10], 0, null, "green", null));
-                }
-            }
-        }
+        // for (let i = 0; i < this.model.maze.layout.length; i++) {
+        //     for (let j = 0; j < this.model.maze.layout[i].length; j++) {
+        //         if (this.model.maze.layout[i][j] === 1) {
+        //             view_objects.push(new ViewObject("rect", [j * 10, i * 10], [10, 10], 0, null, "green", null));
+        //         }
+        //     }
+        // }
         for (const c of this.view_map) {
             view_objects.push(new ViewObject("circle", c.map(n => n), 1, 0, null, "red", null));
         }

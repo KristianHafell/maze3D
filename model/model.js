@@ -68,8 +68,15 @@ export class Model {
             Math.sin(direction) * this.player.speed * (forward ? 1 : -1)
         ];
 
-        const new_pos = [
+        let new_pos = [
             this.player.pos[0] + delta[0],
+            this.player.pos[1]
+        ];
+        if (!this.maze.hit(new_pos)) {
+            this.player.change_pos(new_pos);
+        }
+        new_pos = [
+            this.player.pos[0],
             this.player.pos[1] + delta[1]
         ];
         if (!this.maze.hit(new_pos)) {
