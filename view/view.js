@@ -9,7 +9,7 @@ const eu = Math.exp(Math.log(700) / 10);
 
 const welcome_text = ["Welcome to the maze!", "Use WASD to move", "h = hint"]
 const no_key_text = ["You need to find the key!", "It is somewhere in the maze"]
-const ending_text = ["Congratulations!", "You managed to escape the maze!"]
+const ending_text = ["Congratulations!", "You managed to escape the maze!", ""];
 
 export class View {
     constructor(model, images) {
@@ -26,7 +26,7 @@ export class View {
         
         // console.log(this.model.hasKey, this.model.isGoal, this.model.isVal(4));
         if (this.model.isGoal) {
-            // ending_text[-1] == this.model.player.score;
+            ending_text[ending_text.length - 1] = "you saw " + Math.floor(this.view_map.length/1677*100) + "% of the maze";
             this._drawText(ending_text);
             return;
         }
