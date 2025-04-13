@@ -1,5 +1,5 @@
 export class ViewObject {
-    constructor(objType, position, size, dist, position2 = null, color = null, image = null) {
+    constructor(objType, position, size, dist, position2 = null, color = null, image = null, angle = 0) {
         this.objType = objType;
         this.position = position;
         this.position2 = position2;
@@ -7,11 +7,12 @@ export class ViewObject {
         this.image = image;
         this.color = color;
         this.dist = dist;
+        this.angle = angle;
     }
 
     draw(ctx) {
         if (this.objType === "surface" && this.image) {
-            this.draw_image(ctx, this.position, this.size, this.image);
+            this.draw_image(ctx, this.position, this.size, this.image, this.angle);
         } else if (this.objType === "rect" && this.color) {
             this.draw_rectangle(ctx, this.position, this.size, this.color);
         } else if (this.objType === "circle" && this.color) {
@@ -41,8 +42,12 @@ export class ViewObject {
         ctx.fillStyle = color;
         ctx.fillRect(pos[0], pos[1], size[0], size[1]);
     }
-    draw_image(ctx, pos, size, img) {
-        ctx.drawImage(img, pos[0], pos[1], size[0], size[1]);
+    draw_image(ctx, pos, size, img, angle) {
+        ctx.save();
+        ctx.translate(pos[0] + size[0] / 2, pos[1] + size[1] / 2);
+        ctx.rotate(angle);
+        ctx.drawImage(img, -size[0] / 2, -size[1] / 2, size[0], size[1]);
+        ctx.restore();
     }
 
     toString() {

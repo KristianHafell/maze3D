@@ -35,20 +35,23 @@ export class View {
         this.add_obstacles(view_objects);
 
         
-        const p2 = [this.model.player.pos[0]*10 + Math.cos(this.model.player.rot) * 4, this.model.player.pos[1]*10 + Math.sin(this.model.player.rot) * 4]
-        view_objects.push(new ViewObject("line", this.model.player.pos.map(n => n * 10), 3, 0, p2, "red", null));
-        view_objects.push(new ViewObject("circle", this.model.player.pos.map(n => n * 10), 3, 0, null, "white", null));
-
-        for (const c of this.view_map) {
-            // Replace pygame.draw.circle with equivalent JavaScript code if needed
-            // Example: ctx.beginPath(); ctx.arc(c[0], c[1], 1, 0, 2 * Math.PI); ctx.fillStyle = "red"; ctx.fill();
-            view_objects.push(new ViewObject("circle", c, 1, 0, null, "red", null));
+        for (let i = 0; i < this.model.maze.layout.length; i++) {
+            for (let j = 0; j < this.model.maze.layout[i].length; j++) {
+                if (this.model.maze.layout[i][j] === 1) {
+                    view_objects.push(new ViewObject("rect", [j * 10, i * 10], [10, 10], 0, null, "green", null));
+                }
+            }
         }
+        for (const c of this.view_map) {
+            view_objects.push(new ViewObject("circle", c.map(n => n), 1, 0, null, "red", null));
+        }
+        view_objects.push(new ViewObject("surface", this.model.player.pos.map(n => n * 10-4), [8,8], 0, null, null, this.images["player"], this.model.player.rot));
 
         view_objects.sort((a, b) => b.dist - a.dist);
         for (let vo of view_objects) {
             vo.draw(ctx);
         }
+
 
         this._drawHints();
         this._drawTextOverlays();
