@@ -23,8 +23,9 @@ export class Model {
         ])
         this.obstacles = this._initialize_obstacles();
 
-        this.hasKey = false
-        this.isGoal = false
+        this.hasKey = false;
+        this.isGoal = false;
+        self.hint = false;
     }
 
     _find_position(value) {
@@ -60,8 +61,8 @@ export class Model {
         return this.maze.layout[y]?.[x] === target;
     }
 
-    player_move(forward=true, side=false){
-        const direction = this.player.rot + Math.PI / 2 * side;
+    player_move(forward=true){
+        const direction = this.player.rot;
         const delta = [
             Math.cos(direction) * this.player.speed * (forward ? 1 : -1),
             Math.sin(direction) * this.player.speed * (forward ? 1 : -1)

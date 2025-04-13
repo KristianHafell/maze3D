@@ -27,5 +27,6 @@ export class Controller {
         if (keys["e"]) {
             this.model.player.rotate(true);
         }
+        this.model.hint = keys["h"];
     }
 }
