@@ -7,6 +7,10 @@ ctx.imageSmoothingEnabled = false;
 
 const eu = Math.exp(Math.log(700) / 10);
 
+const welcome_text = ["Welcome to the maze!", "Use WASD to move", "Use QE to rotate", "h = hint"]
+const no_key_text = ["You need to find the key!", "It is somewhere in the maze"]
+const ending_text = ["Congratulations!", "You managed to escape the maze!", "Press r to restart"]
+
 export class View {
     constructor(model, images) {
         this.model = model;
@@ -16,6 +20,12 @@ export class View {
     draw() {
         let view_objects = []
         ctx.clearRect(0, 0, size, size);
+        
+        // console.log(this.model.hasKey, this.model.isGoal, this.model.isVal(4));
+        if (this.model.isGoal) {
+            this._drawText(ending_text);
+            return;
+        }
 
         this.add_rays(view_objects);
         this.add_obstacles(view_objects);
@@ -37,6 +47,10 @@ export class View {
         for (let vo of view_objects) {
             vo.draw(ctx);
         }
+
+        this._drawHints();
+        this._drawTextOverlays();
+
     }
 
     get_height(dist) {
@@ -89,5 +103,38 @@ export class View {
         const x = x_pos - image.width * 0.05 * w / 2;
         const y = (size + height) / 2 - image.height * 0.05 * height;
         return { x, y, w, h };
+    }
+
+    _drawHints() {
+        // Draw hints on the map if enabled.
+        if (this.model.hint) {
+            for (const ob of Object.values(this.model.obstacles)) {
+                const hintPos = ob.pos.map(coord => coord * 10 - 2);
+                ctx.fillStyle = "red";
+                ctx.fillRect(hintPos[0], hintPos[1], 4, 4);
+            }
+        }
+    }
+
+    _drawTextOverlays() {
+        // Draw overlays based on game state.
+        if (this.model.isVal(2)) {
+            this._drawText(welcome_text);
+        }
+        if (this.model.isVal(4)) {
+            this._drawText(no_key_text);
+        }
+    }
+
+    _drawText(textList) {
+        // Draw a list of text lines centered on screen.
+        textList.forEach((text, i) => {
+            ctx.fillStyle = "red";
+            ctx.font = "30px Arial";
+            const textWidth = ctx.measureText(text).width;
+            const centerX = (size - textWidth) / 2;
+            const centerY = (size - 50 * textList.length) / 2;
+            ctx.fillText(text, centerX, centerY + i * 50);
+        });
     }
 }
