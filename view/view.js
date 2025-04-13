@@ -15,6 +15,7 @@ export class View {
         ctx.clearRect(0, 0, size, size);
 
         this.draw_rays();
+        this.add_obstacles();
 
         const p2 = [this.model.player.pos[0]*10 + Math.cos(this.model.player.rot) * 4, this.model.player.pos[1]*10 + Math.sin(this.model.player.rot) * 4]
         this.draw_line(this.model.player.pos.map(n => n * 10), p2, "red", 3);
@@ -31,6 +32,16 @@ export class View {
 
     get_height(dist) {
         return Math.pow(eu, 10 - (dist - 1));
+    }
+
+    angle_and_dist(pos1, pos2) {
+        const delta = [pos2[0] - pos1[0], pos2[1] - pos1[1]];
+        const dist = Math.sqrt(delta[0] ** 2 + delta[1] ** 2);
+        let angle = Math.atan2(delta[1], delta[0]);
+        if (angle < 0) {
+            angle += 2 * Math.PI
+        }
+        return [ angle, dist ]
     }
 
     draw_line(p1, p2, color="black", width=1) {
@@ -70,5 +81,36 @@ export class View {
                 `rgb(0, 0, ${Math.floor(255 * (height / size))})`
             );
         });
+    }
+
+    get_w(image, x_pos, height) {
+        // Compute width and height based on size and height
+        const w = image.width * 0.05 * height;
+        const h = image.height * 0.05 * height;
+
+        // Compute x and y positions
+        const x = x_pos - image.width * 0.05 * w / 2;
+        const y = (size + height) / 2 - image.height * 0.05 * height;
+        return { x, y, w, h };
+    }
+
+    add_obstacles() {
+        const player_pos = this.model.player.pos;
+        const player_rot = this.model.player.rot;
+        const fov = this.model.player.FOV;
+        const pd_min = player_rot - fov / 2;
+
+        for (const ob of Object.values(this.model.obstacles)) {
+            const [ angle, dist ] = this.angle_and_dist(player_pos, ob.pos);
+
+            for (const t of [0, 2 * Math.PI, -2 * Math.PI]) {
+                const x_pos = (angle - pd_min + t) / fov * size;
+                if (0 <= x_pos && x_pos <= size) {
+                    const { x, y, w, h } = this.get_w(this.images[ob.name], x_pos, this.get_height(dist));
+                    this.draw_image([x, y], w, h, this.images[ob.name]);
+                    break;
+                }
+            }
+        }
     }
 }
