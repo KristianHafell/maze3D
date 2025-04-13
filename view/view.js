@@ -1,12 +1,14 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const size = canvas.width;
+ctx.imageSmoothingEnabled = false;
 
 const eu = Math.exp(Math.log(700) / 10);
 
 export class View {
-    constructor(model) {
+    constructor(model, images) {
         this.model = model;
+        this.images = images;
     }
 
     draw() {
@@ -50,6 +52,9 @@ export class View {
     draw_rectangle(p, w, h, color="black") {
         ctx.fillStyle = color;
         ctx.fillRect(p[0], p[1], w, h);
+    }
+    draw_image(p, w, h, img) {
+        ctx.drawImage(img, p[0], p[1], w, h);
     }
     draw_rays() {
         // Draw rays cast by the player.
