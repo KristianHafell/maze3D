@@ -7,14 +7,17 @@ ctx.imageSmoothingEnabled = false;
 
 const eu = Math.exp(Math.log(700) / 10);
 
-const welcome_text = ["Welcome to the maze!", "Use WASD to move", "Use QE to rotate", "h = hint"]
+const welcome_text = ["Welcome to the maze!", "Use WASD to move", "h = hint"]
 const no_key_text = ["You need to find the key!", "It is somewhere in the maze"]
-const ending_text = ["Congratulations!", "You managed to escape the maze!", "Press r to restart"]
+const ending_text = ["Congratulations!", "You managed to escape the maze!", ""];
 
 export class View {
     constructor(model, images) {
         this.model = model;
         this.images = images;
+        this.view_map = []
+
+        this.key = new ViewObject("surface", [size-25-3*5, 25], [3*5, 7*5], 0, null, null, this.images["key"]);
     }
 
     draw() {
@@ -23,6 +26,7 @@ export class View {
         
         // console.log(this.model.hasKey, this.model.isGoal, this.model.isVal(4));
         if (this.model.isGoal) {
+            ending_text[ending_text.length - 1] = "you saw " + Math.floor(this.view_map.length/1677*100) + "% of the maze";
             this._drawText(ending_text);
             return;
         }
@@ -31,26 +35,30 @@ export class View {
         this.add_obstacles(view_objects);
 
         
-        const p2 = [this.model.player.pos[0]*10 + Math.cos(this.model.player.rot) * 4, this.model.player.pos[1]*10 + Math.sin(this.model.player.rot) * 4]
-        view_objects.push(new ViewObject("line", this.model.player.pos.map(n => n * 10), 3, 0, p2, "red", null));
-        view_objects.push(new ViewObject("circle", this.model.player.pos.map(n => n * 10), 3, 0, null, "white", null));
-        
-        for (let i = 0; i < this.model.maze.layout.length; i++) {
-            for (let j = 0; j < this.model.maze.layout[i].length; j++) {
-                if (this.model.maze.layout[i][j] === 1) {
-                    view_objects.push(new ViewObject("rect", [j * 10, i * 10], [10, 10], 0, null, "green", null));
-                }
-            }
+        // for (let i = 0; i < this.model.maze.layout.length; i++) {
+        //     for (let j = 0; j < this.model.maze.layout[i].length; j++) {
+        //         if (this.model.maze.layout[i][j] === 1) {
+        //             view_objects.push(new ViewObject("rect", [j * 10, i * 10], [10, 10], 0, null, "green", null));
+        //         }
+        //     }
+        // }
+        for (const c of this.view_map) {
+            view_objects.push(new ViewObject("circle", c.map(n => n), 1, 0, null, "red", null));
         }
+        view_objects.push(new ViewObject("surface", this.model.player.pos.map(n => n * 10-4), [8,8], 0, null, null, this.images["player"], this.model.player.rot));
 
         view_objects.sort((a, b) => b.dist - a.dist);
         for (let vo of view_objects) {
             vo.draw(ctx);
         }
 
+
         this._drawHints();
         this._drawTextOverlays();
 
+        if (this.model.hasKey) {
+            ctx.drawImage(this.key.image, this.key.position[0], this.key.position[1], this.key.size[0], this.key.size[1]);
+        }
     }
 
     get_height(dist) {
@@ -70,9 +78,17 @@ export class View {
     add_rays(view_objects) {
         // Draw rays cast by the player.
         const res = this.model.player.res;
+        const min_fov = this.model.player.min_FOV;
+        const max_fov = this.model.player.max_FOV;
         this.model.player.ray(this.model.maze.layout).forEach((wall, i) => {
             const height = this.get_height(wall[0]);
             view_objects.push(new ViewObject("rect", [i * (size / res + 1), Math.floor((size - height) / 2)], [size / res + 1, height], wall[0], null, `rgb(0, 0, ${Math.floor(255 * (height / size))})`, null));
+            if (min_fov < wall[0] && wall[0] < max_fov * 0.4) {
+                const pos = [Math.floor(wall[1] * 10), Math.floor(wall[2] * 10)]
+                if (!this.view_map.some(p => p[0] === pos[0] && p[1] === pos[1])) {
+                    this.view_map.push(pos);
+                }
+            }
         });
     }
 

@@ -10,6 +10,7 @@ const images = {
     key: createImage("assets/key.png"),
     goal: createImage("assets/door.png"),
     troll: createImage("assets/us.png"),
+    player: createImage("assets/player.png"),
 };
 
 function createImage(src) {

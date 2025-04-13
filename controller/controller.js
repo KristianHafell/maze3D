@@ -16,16 +16,11 @@ export class Controller {
             this.model.player_move(false);
         }
         if (keys["a"]) {
-            this.model.player_move(false, true);
-        }
-        if (keys["d"]) {
-            this.model.player_move(true, true);
-        }
-        if (keys["q"]) {
             this.model.player.rotate(false);
         }
-        if (keys["e"]) {
+        if (keys["d"]) {
             this.model.player.rotate(true);
         }
+        this.model.hint = keys["h"];
     }
 }
