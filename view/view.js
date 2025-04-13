@@ -1,3 +1,5 @@
+import { ViewObject } from "./view_object.js";
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const size = canvas.width;
@@ -12,21 +14,28 @@ export class View {
     }
 
     draw() {
+        let view_objects = []
         ctx.clearRect(0, 0, size, size);
 
-        this.draw_rays();
-        this.add_obstacles();
+        this.add_rays(view_objects);
+        this.add_obstacles(view_objects);
 
+        
         const p2 = [this.model.player.pos[0]*10 + Math.cos(this.model.player.rot) * 4, this.model.player.pos[1]*10 + Math.sin(this.model.player.rot) * 4]
-        this.draw_line(this.model.player.pos.map(n => n * 10), p2, "red", 3);
-        this.draw_circle(this.model.player.pos.map(n => n * 10), 3, "white");
+        view_objects.push(new ViewObject("line", this.model.player.pos.map(n => n * 10), 3, 0, p2, "red", null));
+        view_objects.push(new ViewObject("circle", this.model.player.pos.map(n => n * 10), 3, 0, null, "white", null));
         
         for (let i = 0; i < this.model.maze.layout.length; i++) {
             for (let j = 0; j < this.model.maze.layout[i].length; j++) {
                 if (this.model.maze.layout[i][j] === 1) {
-                    this.draw_rectangle([j * 10, i * 10], 10, 10, "green");
+                    view_objects.push(new ViewObject("rect", [j * 10, i * 10], [10, 10], 0, null, "green", null));
                 }
             }
+        }
+
+        view_objects.sort((a, b) => b.dist - a.dist);
+        for (let vo of view_objects) {
+            vo.draw(ctx);
         }
     }
 
@@ -44,57 +53,16 @@ export class View {
         return [ angle, dist ]
     }
 
-    draw_line(p1, p2, color="black", width=1) {
-        ctx.lineWidth = width;
-        ctx.strokeStyle = color;
-        ctx.lineCap = "round"; // Set line cap to round for rounded corners
-        ctx.beginPath();
-        ctx.moveTo(p1[0], p1[1]);
-        ctx.lineTo(p2[0], p2[1]);
-        ctx.stroke();
-    }
-    draw_circle(p, r, color="black") {
-        ctx.lineWidth = 1;
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(p[0], p[1], r, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    draw_rectangle(p, w, h, color="black") {
-        ctx.fillStyle = color;
-        ctx.fillRect(p[0], p[1], w, h);
-    }
-    draw_image(p, w, h, img) {
-        ctx.drawImage(img, p[0], p[1], w, h);
-    }
-    draw_rays() {
+    add_rays(view_objects) {
         // Draw rays cast by the player.
         const res = this.model.player.res;
-        const min_fov = this.model.player.min_FOV;
-        const max_fov = this.model.player.max_FOV;
         this.model.player.ray(this.model.maze.layout).forEach((wall, i) => {
             const height = this.get_height(wall[0]);
-            this.draw_rectangle(
-                [i * (size / res + 1), Math.floor((size - height) / 2)],
-                size / res + 1,
-                height,
-                `rgb(0, 0, ${Math.floor(255 * (height / size))})`
-            );
+            view_objects.push(new ViewObject("rect", [i * (size / res + 1), Math.floor((size - height) / 2)], [size / res + 1, height], wall[0], null, `rgb(0, 0, ${Math.floor(255 * (height / size))})`, null));
         });
     }
 
-    get_w(image, x_pos, height) {
-        // Compute width and height based on size and height
-        const w = image.width * 0.05 * height;
-        const h = image.height * 0.05 * height;
-
-        // Compute x and y positions
-        const x = x_pos - image.width * 0.05 * w / 2;
-        const y = (size + height) / 2 - image.height * 0.05 * height;
-        return { x, y, w, h };
-    }
-
-    add_obstacles() {
+    add_obstacles(view_objects) {
         const player_pos = this.model.player.pos;
         const player_rot = this.model.player.rot;
         const fov = this.model.player.FOV;
@@ -107,10 +75,20 @@ export class View {
                 const x_pos = (angle - pd_min + t) / fov * size;
                 if (0 <= x_pos && x_pos <= size) {
                     const { x, y, w, h } = this.get_w(this.images[ob.name], x_pos, this.get_height(dist));
-                    this.draw_image([x, y], w, h, this.images[ob.name]);
+                    view_objects.push(new ViewObject("surface", [x, y], [w, h], dist, null, null, this.images[ob.name]));
                     break;
                 }
             }
         }
+    }
+    get_w(image, x_pos, height) {
+        // Compute width and height based on size and height
+        const w = image.width * 0.05 * height;
+        const h = image.height * 0.05 * height;
+
+        // Compute x and y positions
+        const x = x_pos - image.width * 0.05 * w / 2;
+        const y = (size + height) / 2 - image.height * 0.05 * height;
+        return { x, y, w, h };
     }
 }
