@@ -19,10 +19,25 @@ function createImage(src) {
     return img;
 }
 
-const view = new View(model, images);
+const sounds = {
+    key: new Audio("assets/key.wav"),
+    ambient: new Audio("assets/ambient.wav"),
+    victory: new Audio("assets/victory.wav")
+};
+sounds.ambient.loop = true;
+sounds.ambient.volume = 0.05;
+sounds.ambient.play();
+sounds.key.volume = 1;
+sounds.key.loop = false;
+sounds.key.currentTime = 0;
+sounds.victory.volume = 1;
+sounds.victory.loop = false;
+sounds.victory.currentTime = 0;
+
+const view = new View(model, images, sounds);
 
 function gameLoop() {
-    const fps = 60;
+    const fps = 120;
     const interval = 1000 / fps;
 
     let lastTime = 0;
@@ -42,7 +57,5 @@ function gameLoop() {
 
     requestAnimationFrame(loop);
 }
-
-gameLoop();
 
 gameLoop();

@@ -25,7 +25,10 @@ export class Model {
 
         this.hasKey = false;
         this.isGoal = false;
-        self.hint = false;
+        this.hint = false;
+        this.play_ambient = [false, false];
+        this.play_key = false;
+        this.play_victory = false;
     }
 
     _find_position(value) {
@@ -90,10 +93,12 @@ export class Model {
             const x = Math.floor(this.player.pos[0]);
             const y = Math.floor(this.player.pos[1]);
             this.maze.layout[y][x] = 0;
+            this.play_key = true;
         }
 
         // Interact with goal
         if (this.isVal(4) && this.hasKey) {
+            this.play_victory = true;
             this.isGoal = true;
         }
     }
