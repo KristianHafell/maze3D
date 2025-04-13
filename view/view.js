@@ -87,11 +87,16 @@ export class View {
         const pd_min = player_rot - fov / 2;
 
         for (const ob of Object.values(this.model.obstacles)) {
-            const [ angle, dist ] = this.angle_and_dist(player_pos, ob.pos);
+            const [angle, dist] = this.angle_and_dist(player_pos, ob.pos);
 
-            const x_pos = (angle - this.norm_angle(pd_min)) / fov * size;
+            for (const t of [0, 2 * Math.PI, -2 * Math.PI]) {
+            const x_pos = (angle - this.norm_angle(pd_min) + t) / fov * size;
             const { x, y, w, h } = this.get_w(this.images[ob.name], x_pos, this.get_height(dist));
-            view_objects.push(new ViewObject("surface", [x, y], [w, h], dist, null, null, this.images[ob.name]));
+            if (-w < x_pos && x_pos < size + w) {
+                view_objects.push(new ViewObject("surface", [x, y], [w, h], dist, null, null, this.images[ob.name]));
+                break;
+            }
+            }
         }
     }
     get_w(image, x_pos, height) {
