@@ -20,12 +20,28 @@ function createImage(src) {
 
 const view = new View(model, images);
 
-function gameLoop() {   
-    controller.handleInput();
-    
-    view.draw();
+function gameLoop() {
+    const fps = 60;
+    const interval = 1000 / fps;
 
-    requestAnimationFrame(gameLoop);
+    let lastTime = 0;
+
+    function loop(currentTime) {
+        const deltaTime = currentTime - lastTime;
+
+        if (deltaTime >= interval) {
+            lastTime = currentTime;
+
+            controller.handleInput();
+            view.draw();
+        }
+
+        requestAnimationFrame(loop);
+    }
+
+    requestAnimationFrame(loop);
 }
+
+gameLoop();
 
 gameLoop();
