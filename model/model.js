@@ -22,6 +22,9 @@ export class Model {
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ])
         this.obstacles = this._initialize_obstacles();
+
+        this.hasKey = false
+        this.isGoal = false
     }
 
     _find_position(value) {
@@ -50,6 +53,13 @@ export class Model {
         );
     }
 
+    isVal(target) {
+        // Check if player's current tile matches a target using direct indexing.
+        const x = Math.trunc(this.player.pos[0]);
+        const y = Math.trunc(this.player.pos[1]);
+        return this.maze.layout[y]?.[x] === target;
+    }
+
     player_move(forward=true, side=false){
         const direction = this.player.rot + Math.PI / 2 * side;
         const delta = [
@@ -64,6 +74,19 @@ export class Model {
         if (!this.maze.hit(new_pos)) {
             this.player.change_pos(new_pos);
         }
-        
+
+        // Interact with key
+        if (this.isVal(3)) {
+            this.hasKey = true;
+            this.obstacles["key"].pos = [-1, -1];
+            const x = Math.floor(this.player.pos[0]);
+            const y = Math.floor(this.player.pos[1]);
+            this.maze.layout[y][x] = 0;
+        }
+
+        // Interact with goal
+        if (this.isVal(4) && this.hasKey) {
+            this.isGoal = true;
+        }
     }
 }
